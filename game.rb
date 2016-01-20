@@ -18,6 +18,20 @@ class Game < Hasu::Window
 
   def reset
     @board = Board.new(self)
+    @board.new_game
+  end
+
+  def button_down(id)
+    case id
+    when Gosu::KbEscape
+      close
+
+    when Gosu::MsLeft
+      board.reveal_at mouse_x, mouse_y
+
+    when Gosu::MsRight
+      # @board.flag_at mouse_x, mouse_y
+    end
   end
 
   def draw
@@ -26,7 +40,7 @@ class Game < Hasu::Window
   end
 
   def draw_background
-    Gosu.draw_rect 0, 0, width, height, Gosu::Color.argb(0xff888888)
+    Gosu.draw_rect 0, 0, width, height, Gosu::Color.argb(0xff999999)
   end
 
   private
