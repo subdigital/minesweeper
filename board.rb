@@ -39,22 +39,16 @@ class Board
     @visible_field = blank_field
   end
 
-  def is_mine?(x, y)
+  def is_mine?(coords)
+    x = coords[:x]
+    y = coords[:y]
     return false if x < 0 || y < 0 || x >= @num_tiles || y >= @num_tiles
     return field[y][x] == tile_index(:mine)
   end
 
   def number_of_adjacent_mines(x, y)
-    m = 0
-    m += 1 if is_mine?(x-1, y)
-    m += 1 if is_mine?(x+1, y)
-    m += 1 if is_mine?(x, y - 1)
-    m += 1 if is_mine?(x, y + 1)
-    m += 1 if is_mine?(x-1, y - 1)
-    m += 1 if is_mine?(x+1, y - 1)
-    m += 1 if is_mine?(x-1, y + 1)
-    m += 1 if is_mine?(x+1, y + 1)
-    m
+    c = {x: x, y: y}
+    adjacent_coords(c).select {|adj| is_mine?(adj)}.count
   end
 
   def adjacent_to_mine?(x, y)
@@ -107,7 +101,21 @@ class Board
       visible_field[y][x] = tile_index(:red_mine)
     end
 
-    puts "Chosen tile #{chosen_tile}"
+    # puts "Chosen tile #{chosen_tile}"
+  end
+
+  # for debugging
+  def print_field
+    field.each do |row|
+      row.each do |tile|
+        print case tile_for_index(tile)
+        when :blank then "•"
+        when :mine then "X"
+        else "."
+        end
+      end
+      puts
+    end
   end
 
   def flag_at(coordinates)
@@ -216,13 +224,14 @@ class Board
     x = coords[:x]
     y = coords[:y]
     [
-      [x-1, y],
-      [x-1, y-1],
-      [x,   y-1],
-      [x+1, y-1],
-      [x+1, y+1],
-      [x,   y+1],
-      [x-1, y+1]
+      [x-1, y],    # left
+      [x-1, y-1],  # up-left
+      [x,   y-1],  # up
+      [x+1, y-1],  # up-right
+      [x+1, y],    # right
+      [x+1, y+1],  # down-right
+      [x,   y+1],  # down
+      [x-1, y+1]   # down-left
     ].map {|pair| {x: pair[0], y: pair[1]} }
   end
 
@@ -239,11 +248,17 @@ class Board
       mine_coords << coords
     end
 
-    @num_tiles.times.map { |y|
+    f = @num_tiles.times.map { |y|
       @num_tiles.times.map { |x|
         tile = mine_coords.include?({x: x, y: y}) ? :mine : :blank
         tile_index(tile)
       }
     }
+
+    unless f.count == @num_tiles && f.all? {|r| r.count == @num_tiles }
+      raise "Invalid board!"
+    end
+
+    f
   end
 end
