@@ -25,6 +25,7 @@ class Board
   attr_reader :sprite_sheet
   attr_reader :field
   attr_reader :visible_field
+  attr_reader :game_over
 
   def initialize(window)
     @window = window
@@ -33,24 +34,72 @@ class Board
   end
 
   def new_game
+    @field = nil
+    @game_over = false
     @visible_field = blank_field
   end
 
-  def reveal_at(coordinates)
+  def is_mine?(x, y)
+    return false if x < 0 || y < 0 || x >= @num_tiles || y >= @num_tiles
+    return field[y][x] == tile_index(:mine)
+  end
+
+  def number_of_adjacent_mines(x, y)
+    m = 0
+    m += 1 if is_mine?(x-1, y)
+    m += 1 if is_mine?(x+1, y)
+    m += 1 if is_mine?(x, y - 1)
+    m += 1 if is_mine?(x, y + 1)
+    m += 1 if is_mine?(x-1, y - 1)
+    m += 1 if is_mine?(x+1, y - 1)
+    m += 1 if is_mine?(x-1, y + 1)
+    m += 1 if is_mine?(x+1, y + 1)
+    m
+  end
+
+  def adjacent_to_mine?(x, y)
+    number_of_adjacent_mines(x, y) > 0
+  end
+
+  def reveal_if_blank(x, y)
+    if field[y][x] == tile_index(:blank)
+      reveal_at({x: x, y: y}, true)
+    end
+  end
+
+  def reveal_touching_tiles(x, y)
+    reveal_if_blank(x-1, y) if x - 1 >= 0
+    reveal_if_blank(x+1, y) if x + 1 < @num_tiles
+    reveal_if_blank(x, y - 1) if y - 1 >= 0
+    reveal_if_blank(x, y + 1) if y + 1 < @num_tiles
+  end
+
+  def reveal_at(coordinates, auto = false)
     unless field
       @field = generate_field(coordinates)
     end
 
     y = coordinates[:y]
     x = coordinates[:x]
+    return if visible_field[y][x] == tile_index(:blank)
     chosen_tile = field[y][x]
 
     case tile_for_index(chosen_tile)
-    when :blank then visible_field[y][x] = chosen_tile
+    when :blank then 
+      adjacent_mines = number_of_adjacent_mines(x, y)
+      if adjacent_mines == 0
+        visible_field[y][x] = tile_index(:blank)
+      else
+        visible_field[y][x] = adjacent_mines
+      end
+
+      reveal_touching_tiles(x, y) if (adjacent_mines == 0 || auto == false)
+      
     when :mine then
+      @game_over = true
       field.each_with_index do |row, r|
         row.each_with_index do |ft, c|
-          if visible_field[r][c] == tile_index(:raised)
+          if ft == tile_index(:mine)
             visible_field[r][c] = ft
           end
         end

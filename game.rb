@@ -34,11 +34,14 @@ class Game < Hasu::Window
       close
 
     when Gosu::MsLeft
-      coordinates = board.translate_screen(mouse_x, mouse_y)
-      return if coordinates.nil?
-      board.reveal_at(coordinates)
-      # board.reveal_at mouse_x, mouse_y
-
+      if board.game_over
+        board.new_game
+      else
+        coordinates = board.translate_screen(mouse_x, mouse_y)
+        return if coordinates.nil?
+        board.reveal_at(coordinates)
+      end
+      
     when Gosu::MsRight
       # @board.flag_at mouse_x, mouse_y
     end
