@@ -1,7 +1,7 @@
 class Board
 
   SOURCE_TILE_SIZE = 16
-  SCALE_FACTOR = 4
+  SCALE_FACTOR = 2
   TILE_SIZE = SOURCE_TILE_SIZE * SCALE_FACTOR
 
   TILE_POSITIONS = [
@@ -29,7 +29,7 @@ class Board
 
   def initialize(window)
     @window = window
-    @num_tiles = 10
+    @num_tiles = 20
     _load_tiles
   end
 
@@ -203,7 +203,7 @@ class Board
   end
 
   def generate_field(except_coords)
-    num_mines = (@num_tiles*@num_tiles) / 4
+    num_mines = (@num_tiles*@num_tiles) / 10
     mine_coords = []
     while mine_coords.count < num_mines
       x = Gosu::random(0, @num_tiles).floor
