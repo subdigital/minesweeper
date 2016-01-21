@@ -60,19 +60,7 @@ class Game < Hasu::Window
 
 end
 
-# game = Game.new
-# Thread.new {
-#   game.show
-# }
-# game.draw
-# game.update
-# game.draw
-# puts "Game field: #{game.board.field}"
-
-# game.board.reveal_at({x: 3, y: 0})
-
-# Game.new.show
-
-# while 1
-# end
+if $0 == __FILE__
+  Game.run
+end
 
