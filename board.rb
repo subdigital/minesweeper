@@ -212,6 +212,20 @@ class Board
     }
   end
 
+  def adjacent_coords(coords)
+    x = coords[:x]
+    y = coords[:y]
+    [
+      [x-1, y],
+      [x-1, y-1],
+      [x,   y-1],
+      [x+1, y-1],
+      [x+1, y+1],
+      [x,   y+1],
+      [x-1, y+1]
+    ].map {|pair| {x: pair[0], y: pair[1]} }
+  end
+
   def generate_field(except_coords)
     num_mines = (@num_tiles*@num_tiles) / 10
     mine_coords = []
@@ -221,6 +235,7 @@ class Board
       coords = {x: x, y: y}
       next if mine_coords.include?(coords)
       next if except_coords == coords
+      next if adjacent_coords(except_coords).include?(coords)
       mine_coords << coords
     end
 
