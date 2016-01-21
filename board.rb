@@ -24,6 +24,7 @@ class Board
   attr_reader :window
   attr_reader :sprite_sheet
   attr_reader :field
+  attr_reader :visible_field
 
   def initialize(window)
     @window = window
@@ -32,17 +33,45 @@ class Board
   end
 
   def new_game
-    @field = generate_field
+    @visible_field = blank_field
   end
 
   def reveal_at(coordinates)
-    chosen_tile = field[coordinates[:y]][coordinates[:x]]
+    unless field
+      @field = generate_field(coordinates)
+    end
+
+    y = coordinates[:y]
+    x = coordinates[:x]
+    chosen_tile = field[y][x]
+
+    case tile_for_index(chosen_tile)
+    when :blank then visible_field[y][x] = chosen_tile
+    when :mine then
+      field.each_with_index do |row, r|
+        row.each_with_index do |ft, c|
+          if visible_field[r][c] == tile_index(:raised)
+            visible_field[r][c] = ft
+          end
+        end
+      end
+      visible_field[y][x] = tile_index(:red_mine)
+    end
+
     puts "Chosen tile #{chosen_tile}"
   end
 
   def valid_coordinates?(coordinates)
     return false if coordinates[:x] < 0 || coordinates[:x] > @num_tiles -1 || coordinates[:y] < 0 || coordinates[:y] > @num_tiles - 1
     true
+  end
+
+  def tile_index(name)
+    TILE_POSITIONS.find_index name
+  end
+
+  def tile_for_index(index)
+    TILE_POSITIONS[index]
   end
 
   def draw
@@ -69,7 +98,7 @@ class Board
   def draw_tiles
     @num_tiles.times do |y|
       @num_tiles.times do |x|
-        tile_index = field[y][x]
+        tile_index = visible_field[y][x]
         tile = sprite_sheet[tile_index]
         tile.draw board_x + x*TILE_SIZE, board_y + y*TILE_SIZE, 0, SCALE_FACTOR, SCALE_FACTOR
       end
@@ -118,9 +147,29 @@ class Board
     }
   end
 
-  def generate_field
+  def blank_field
     @num_tiles.times.map {
-      @num_tiles.times.map { TILE_POSITIONS.find_index(TILE_POSITIONS.sample) }
+      @num_tiles.times.map { tile_index(:raised) }
+    }
+  end
+
+  def generate_field(except_coords)
+    num_mines = (@num_tiles*@num_tiles) / 4
+    mine_coords = []
+    while mine_coords.count < num_mines
+      x = Gosu::random(0, @num_tiles).floor
+      y = Gosu::random(0, @num_tiles).floor
+      coords = {x: x, y: y}
+      next if mine_coords.include?(coords)
+      next if except_coords == coords
+      mine_coords << coords
+    end
+
+    @num_tiles.times.map { |y|
+      @num_tiles.times.map { |x|
+        tile = mine_coords.include?({x: x, y: y}) ? :mine : :blank
+        tile_index(tile)
+      }
     }
   end
 end
