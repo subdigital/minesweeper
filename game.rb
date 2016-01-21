@@ -21,14 +21,27 @@ class Game < Hasu::Window
     @board.new_game
   end
 
+  def chat_select(coordinates)
+    if not board.valid_coordinates?(coordinates)
+      puts "invalid coordinates"
+    end
+    board.reveal_at(coordinates)
+  end
+
   def button_down(id)
     case id
     when Gosu::KbEscape
       close
 
     when Gosu::MsLeft
-      board.reveal_at mouse_x, mouse_y
-
+      if board.game_over
+        board.new_game
+      else
+        coordinates = board.translate_screen(mouse_x, mouse_y)
+        return if coordinates.nil?
+        board.reveal_at(coordinates)
+      end
+      
     when Gosu::MsRight
       # @board.flag_at mouse_x, mouse_y
     end
@@ -47,4 +60,19 @@ class Game < Hasu::Window
 
 end
 
-Game.run
+# game = Game.new
+# Thread.new {
+#   game.show
+# }
+# game.draw
+# game.update
+# game.draw
+# puts "Game field: #{game.board.field}"
+
+# game.board.reveal_at({x: 3, y: 0})
+
+# Game.new.show
+
+# while 1
+# end
+
