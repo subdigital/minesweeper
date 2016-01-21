@@ -41,9 +41,11 @@ class Game < Hasu::Window
         return if coordinates.nil?
         board.reveal_at(coordinates)
       end
-      
+
     when Gosu::MsRight
-      # @board.flag_at mouse_x, mouse_y
+        coordinates = board.translate_screen(mouse_x, mouse_y)
+        return if coordinates.nil?
+        board.flag_at coordinates
     end
   end
 

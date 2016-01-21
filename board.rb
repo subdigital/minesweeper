@@ -85,7 +85,7 @@ class Board
     chosen_tile = field[y][x]
 
     case tile_for_index(chosen_tile)
-    when :blank then 
+    when :blank then
       adjacent_mines = number_of_adjacent_mines(x, y)
       if adjacent_mines == 0
         visible_field[y][x] = tile_index(:blank)
@@ -94,7 +94,7 @@ class Board
       end
 
       reveal_touching_tiles(x, y) if (adjacent_mines == 0 || auto == false)
-      
+
     when :mine then
       @game_over = true
       field.each_with_index do |row, r|
@@ -108,6 +108,16 @@ class Board
     end
 
     puts "Chosen tile #{chosen_tile}"
+  end
+
+  def flag_at(coordinates)
+    x = coordinates[:x]
+    y = coordinates[:y]
+    tile = tile_for_index(visible_field[y][x])
+    case tile
+    when :raised then visible_field[y][x] = tile_index(:flag)
+    when :flag then visible_field[y][x] = tile_index(:raised)
+    end
   end
 
   def valid_coordinates?(coordinates)
