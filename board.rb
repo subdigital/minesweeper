@@ -35,9 +35,14 @@ class Board
     @field = generate_field
   end
 
-  def reveal_at(sx, sy)
-    board_coords = translate_screen(sx, sy)
-    return if board_coords.nil?
+  def reveal_at(coordinates)
+    chosen_tile = field[coordinates[:y]][coordinates[:x]]
+    puts "Chosen tile #{chosen_tile}"
+  end
+
+  def valid_coordinates?(coordinates)
+    return false if coordinates[:x] < 0 || coordinates[:x] > @num_tiles -1 || coordinates[:y] < 0 || coordinates[:y] > @num_tiles - 1
+    true
   end
 
   def draw
@@ -107,10 +112,10 @@ class Board
     return nil if y < board_y || y > (board_y + height)
     relative_x = x - board_x
     relative_y = y - board_y
-    [
-      (relative_x / TILE_SIZE).floor,
-      (relative_y / TILE_SIZE).floor
-    ]
+    {
+      x: (relative_x / TILE_SIZE).floor,
+      y: (relative_y / TILE_SIZE).floor
+    }
   end
 
   def generate_field
