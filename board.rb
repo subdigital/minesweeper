@@ -3,6 +3,9 @@ class Board
   SOURCE_TILE_SIZE = 16
   SCALE_FACTOR = 2
   TILE_SIZE = SOURCE_TILE_SIZE * SCALE_FACTOR
+  MAX_DIFFICULTY = 7
+  DIFFICULTY_SCALE = 0.05
+  MINIMUM_DIFICULTY_SCALE = 0.1
 
   TILE_POSITIONS = [
     :blank,
@@ -26,17 +29,35 @@ class Board
   attr_reader :field
   attr_reader :visible_field
   attr_reader :game_over
+  attr_reader :difficulty
 
   def initialize(window)
     @window = window
     @num_tiles = 20
     _load_tiles
+    @difficulty = MAX_DIFFICULTY
   end
 
-  def new_game
+  def new_game(won = false)
     @field = nil
     @game_over = false
     @visible_field = blank_field
+    if won && difficulty < MAX_DIFFICULTY
+      increase_difficulty
+    else
+      decrease_difficulty
+    end
+  end
+
+  def increase_difficulty
+    @difficulty+= 1
+  end
+
+  def decrease_difficulty
+    @difficulty-= 1
+    if difficulty < 1
+      difficulty = 1
+    end
   end
 
   def is_mine?(x, y)
@@ -203,7 +224,11 @@ class Board
   end
 
   def generate_field(except_coords)
-    num_mines = (@num_tiles*@num_tiles) / 10
+    scale = difficulty * DIFFICULTY_SCALE
+    if scale < MINIMUM_DIFICULTY_SCALE
+      scale = MINIMUM_DIFICULTY_SCALE
+    end
+    num_mines = (@num_tiles * @num_tiles * scale).floor
     mine_coords = []
     while mine_coords.count < num_mines
       x = Gosu::random(0, @num_tiles).floor
