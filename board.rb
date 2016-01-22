@@ -60,22 +60,16 @@ class Board
     end
   end
 
-  def is_mine?(x, y)
+  def is_mine?(coords)
+    x = coords[:x]
+    y = coords[:y]
     return false if x < 0 || y < 0 || x >= @num_tiles || y >= @num_tiles
     return field[y][x] == tile_index(:mine)
   end
 
   def number_of_adjacent_mines(x, y)
-    m = 0
-    m += 1 if is_mine?(x-1, y)
-    m += 1 if is_mine?(x+1, y)
-    m += 1 if is_mine?(x, y - 1)
-    m += 1 if is_mine?(x, y + 1)
-    m += 1 if is_mine?(x-1, y - 1)
-    m += 1 if is_mine?(x+1, y - 1)
-    m += 1 if is_mine?(x-1, y + 1)
-    m += 1 if is_mine?(x+1, y + 1)
-    m
+    c = {x: x, y: y}
+    adjacent_coords(c).select {|adj| is_mine?(adj)}.count
   end
 
   def adjacent_to_mine?(x, y)
@@ -106,7 +100,7 @@ class Board
     chosen_tile = field[y][x]
 
     case tile_for_index(chosen_tile)
-    when :blank then 
+    when :blank then
       adjacent_mines = number_of_adjacent_mines(x, y)
       if adjacent_mines == 0
         visible_field[y][x] = tile_index(:blank)
@@ -115,7 +109,7 @@ class Board
       end
 
       reveal_touching_tiles(x, y) if (adjacent_mines == 0 || auto == false)
-      
+
     when :mine then
       @game_over = true
       field.each_with_index do |row, r|
@@ -128,7 +122,31 @@ class Board
       visible_field[y][x] = tile_index(:red_mine)
     end
 
-    puts "Chosen tile #{chosen_tile}"
+    # puts "Chosen tile #{chosen_tile}"
+  end
+
+  # for debugging
+  def print_field
+    field.each do |row|
+      row.each do |tile|
+        print case tile_for_index(tile)
+        when :blank then "•"
+        when :mine then "X"
+        else "."
+        end
+      end
+      puts
+    end
+  end
+
+  def flag_at(coordinates)
+    x = coordinates[:x]
+    y = coordinates[:y]
+    tile = tile_for_index(visible_field[y][x])
+    case tile
+    when :raised then visible_field[y][x] = tile_index(:flag)
+    when :flag then visible_field[y][x] = tile_index(:raised)
+    end
   end
 
   def valid_coordinates?(coordinates)
@@ -223,6 +241,21 @@ class Board
     }
   end
 
+  def adjacent_coords(coords)
+    x = coords[:x]
+    y = coords[:y]
+    [
+      [x-1, y],    # left
+      [x-1, y-1],  # up-left
+      [x,   y-1],  # up
+      [x+1, y-1],  # up-right
+      [x+1, y],    # right
+      [x+1, y+1],  # down-right
+      [x,   y+1],  # down
+      [x-1, y+1]   # down-left
+    ].map {|pair| {x: pair[0], y: pair[1]} }
+  end
+
   def generate_field(except_coords)
     scale = difficulty * DIFFICULTY_SCALE
     if scale < MINIMUM_DIFICULTY_SCALE
@@ -236,14 +269,21 @@ class Board
       coords = {x: x, y: y}
       next if mine_coords.include?(coords)
       next if except_coords == coords
+      next if adjacent_coords(except_coords).include?(coords)
       mine_coords << coords
     end
 
-    @num_tiles.times.map { |y|
+    f = @num_tiles.times.map { |y|
       @num_tiles.times.map { |x|
         tile = mine_coords.include?({x: x, y: y}) ? :mine : :blank
         tile_index(tile)
       }
     }
+
+    unless f.count == @num_tiles && f.all? {|r| r.count == @num_tiles }
+      raise "Invalid board!"
+    end
+
+    f
   end
 end

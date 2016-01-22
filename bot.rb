@@ -24,7 +24,7 @@ class MineSweeperBot < Cinch::Bot
         c.server = "irc.twitch.tv"
         c.channels = ["#quantumproductions"]
         c.nick = "quantumproductions"
-        c.password = "oauth:micj4w45jt0haehn3i8n68v2s07nsi" 
+        c.password = ":)" 
       end
       
       on :message do |m, who, text| 
