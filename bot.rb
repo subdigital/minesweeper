@@ -1,5 +1,8 @@
 require 'hasu'
 require 'cinch'
+require 'dotenv'
+
+Dotenv.load
 
 Hasu.load 'game.rb'
 
@@ -21,10 +24,10 @@ class MineSweeperBot < Cinch::Bot
   def self.mineSweeperBot(game)
     MineSweeperBot.new(game) do
       configure do |c|
-        c.server = "irc.twitch.tv"
-        c.channels = ["#quantumproductions"]
-        c.nick = "quantumproductions"
-        c.password = ":)" 
+        c.server = ENV['IRC_SERVER']
+        c.channels = [ENV['IRC_CHANNEL']]
+        c.nick = ENV['IRC_NICK']
+        c.password = ENV['IRC_PASSWORD']
       end
       
       on :message do |m, who, text| 
