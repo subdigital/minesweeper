@@ -22,7 +22,9 @@ class MineSweeperBot < Cinch::Bot
   end
 
   def message_coordinates(message, command)
-    message = message.sub(' ', '')
+    message.gsub!(' ', '')
+    message.gsub!('(', '')
+    message.gsub!(')', '')
     coordinateCommand = message.split(command)[1]
     return nil if coordinateCommand.nil?
     coordinates = coordinateCommand.split(',')
