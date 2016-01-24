@@ -78,6 +78,12 @@ class MineSweeperBot < Cinch::Bot
           next if coordinates.nil?
           bot.game.chat_flag(coordinates)
         end
+
+        if (m.message[0..5] == 'unflag')
+          coordinates = bot.message_coordinates(m.message, 'unflag')
+          next if coordinates.nil?
+          bot.game.chat_unflag(coordinates)
+        end
       end
 
     end

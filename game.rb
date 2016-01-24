@@ -33,10 +33,29 @@ class Game < Hasu::Window
   end
 
   def chat_select(coordinates)
-    if not board.valid_coordinates?(coordinates)
-      puts "invalid coordinates"
-    end
+    return if not board.valid_coordinates?(coordinates)
     board.reveal_at(coordinates)
+  end
+
+  def chat_flag(coordinates)
+    return if not board.valid_coordinates?(coordinates)
+
+    if board.visible_field[coordinates[:y]][coordinates[:x]] == board.tile_index(:raised)
+      flag(coordinates)
+    end
+  end
+
+  def chat_unflag(coordinates)
+    return if not board.valid_coordinates?(coordinates)
+
+    if board.visible_field[coordinates[:y]][coordinates[:x]] == board.tile_index(:flag)
+      flag(coordinates)
+    end
+  end
+
+  def flag(coordinates)
+    board.flag_at(coordinates)
+    mine_display.set_number [board.mine_count - board.flag_count, 0].max
   end
 
   def button_down(id)
@@ -56,8 +75,7 @@ class Game < Hasu::Window
     when Gosu::MsRight
         coordinates = board.translate_screen(mouse_x, mouse_y)
         return if coordinates.nil?
-        board.flag_at(coordinates)
-        mine_display.set_number [board.mine_count - board.flag_count, 0].max
+        flag(coordinates)
     end
   end
 
