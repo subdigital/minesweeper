@@ -21,6 +21,19 @@ class MineSweeperBot < Cinch::Bot
     # irc.send text
   end
 
+  def message_coordinates(message, command)
+    message = message.sub(' ', '')
+    coordinateCommand = message.split(command)[1]
+    return nil if coordinateCommand.nil?
+    coordinates = coordinateCommand.split(',')
+    return nil if coordinates.length != 2
+    x = Integer(coordinates[0]) rescue nil
+    return nil if x.nil?
+    y = Integer(coordinates[1]) rescue nil
+    return nil if y.nil?
+    return {x: x, y: y}
+  end
+
   def self.mineSweeperBot(game)
     MineSweeperBot.new(game) do
       configure do |c|
@@ -55,19 +68,15 @@ class MineSweeperBot < Cinch::Bot
         end
 
         if (m.message[0..4] == 'sweep')
-          coordinateCommand = m.message.split('sweep')[1]
-          puts "coordinateCommand#{coordinateCommand}"
-          return if coordinateCommand.nil?
-          coordinates = coordinateCommand.split(',')
-          puts "coordinates: #{coordinates}"
-          return if coordinates.length != 2
-          x = Integer(coordinates[0]) rescue nil
-          puts "x #{x}"
-          return if x.nil?
-          y = Integer(coordinates[1]) rescue nil
-          puts "y #{y}"
-          return if y.nil?
-          bot.game.chat_select({x: x, y: y})
+          coordinates = bot.message_coordinates(m.message, 'sweep')
+          next if coordinates.nil?
+          bot.game.chat_select(coordinates)
+        end
+
+        if (m.message[0..3] == 'flag')
+          coordinates = bot.message_coordinates(m.message, 'flag')
+          next if coordinates.nil?
+          bot.game.chat_flag(coordinates)
         end
       end
 
