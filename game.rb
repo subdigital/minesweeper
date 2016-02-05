@@ -1,9 +1,21 @@
 require 'rubygems'
 require 'gosu'
 require 'hasu'
+require 'thread'
 
 Hasu.load 'board.rb'
 Hasu.load 'led_display.rb'
+
+class SweepCommand
+  def initialize(game)
+    @game = game
+  end
+
+  def perform(coordinates)
+    return if not @game.board.valid_coordinates?(coordinates)
+    @game.board.reveal_at(coordinates)
+  end
+end
 
 class Game < Hasu::Window
   attr_reader :board
@@ -30,6 +42,13 @@ class Game < Hasu::Window
     @mine_display.x = board.board_x - board.border_width
     @mine_display.y = board.board_y - @mine_display.height - board.border_width * 2 
     @mine_display.set_number board.mine_count
+
+    @command_queue = Queue.new
+  end
+
+  # threadsafe
+  def enqueue_command(*cmd)
+    @command_queue << cmd
   end
 
   def chat_select(coordinates)
@@ -58,6 +77,10 @@ class Game < Hasu::Window
     mine_display.set_number [board.mine_count - board.flag_count, 0].max
   end
 
+  def game_over?
+    board.game_over
+  end
+
   def button_down(id)
     case id
     when Gosu::KbEscape
@@ -76,6 +99,32 @@ class Game < Hasu::Window
         coordinates = board.translate_screen(mouse_x, mouse_y)
         return if coordinates.nil?
         flag(coordinates)
+    end
+  end
+
+  def update
+    process_commands
+    if game_over?
+      @command_queue.clear
+    end
+  end
+
+  def process_commands
+    cmd = @command_queue.pop(true) rescue nil
+    if cmd
+      action = cmd.first
+      args = cmd.slice(1..-1)
+      puts "PROCESSING COMMAND: #{action}  (#{args})"
+
+      command_map = {
+        :sweep => SweepCommand
+      }
+
+      command_class = command_map[action]
+      if command_class
+        command_class.new(self).perform(*args)
+      end
+      
     end
   end
 
