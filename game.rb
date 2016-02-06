@@ -5,25 +5,24 @@ require 'thread'
 
 Hasu.load 'board.rb'
 Hasu.load 'led_display.rb'
-
-class SweepCommand
-  def initialize(game)
-    @game = game
-  end
-
-  def perform(coordinates)
-    return if not @game.board.valid_coordinates?(coordinates)
-    @game.board.reveal_at(coordinates)
-  end
-end
+Hasu.load 'commands.rb'
 
 class Game < Hasu::Window
   attr_reader :board
   attr_reader :mine_display
+  attr_reader :command_queue
+  attr_reader :voted_commands
+  attr_reader :user_votes
 
   def initialize
     super 1000, 1000, fullscreen: false
     self.caption = "Minesweeper!"
+    setup_votes
+  end
+
+  def setup_votes
+    @voted_commands = {}
+    @user_votes = {}
   end
 
   def needs_cursor?
@@ -113,19 +112,42 @@ class Game < Hasu::Window
     cmd = @command_queue.pop(true) rescue nil
     if cmd
       action = cmd.first
-      args = cmd.slice(1..-1)
+      args = cmd.slice(0..-1)
       puts "PROCESSING COMMAND: #{action}  (#{args})"
-
-      command_map = {
-        :sweep => SweepCommand
-      }
-
-      command_class = command_map[action]
-      if command_class
-        command_class.new(self).perform(*args)
-      end
-      
+      # Assuming commands are votes, create a Ballot.
+      Ballot.new(self).perform(*args)      
     end
+  end
+
+  def vote(* args)
+    username = args[2]
+
+    puts "VOTING #{args}"
+    puts "Username: #{username}"
+
+    previous_vote = @user_votes[username]
+    if previous_vote
+      @voted_commands[previous_vote].remove_vote username
+    end
+
+    # assign their new vote
+    command_identifier = VoteCommand.identifier(args.slice(0..-2))
+    # existing_command = @voted_commands[existing_command]
+    # if existing_command
+    #   existing_command.add_vote username
+    # else
+    #   command_map = {
+    #     :sweep => VoteSweepCommand
+    #   }
+
+    #   command_class = command_map[args[0]]
+    #   if command_class
+    #     vote = command_class.new(self, args.slice(1..-1))
+    #     @voted_commands.push(command_class.new(self, args.slice(1..-1))
+    #   end
+
+    # end
+
   end
 
   def draw

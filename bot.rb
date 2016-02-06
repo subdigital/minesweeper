@@ -70,7 +70,7 @@ class MineSweeperBot < Cinch::Bot
         if (m.message[0..4] == 'sweep')
           coordinates = bot.message_coordinates(m.message, 'sweep')
           next if coordinates.nil?
-          bot.game.enqueue_command :sweep, coordinates
+          bot.game.enqueue_command :sweep, coordinates, name
 #          bot.game.chat_select(coordinates)
         end
 
