@@ -1,7 +1,7 @@
 class VoteCommand
-	def initialize(game, args)
+	def initialize(args)
 		puts "initialized vote command with args #{args}"
-		@game = game
+		# @game = game
 		@args = args
 		@voters = [args[1]]
 		puts "Vote command has voters #{@voters}"
@@ -20,7 +20,7 @@ class VoteCommand
 		@voters.count
 	end
 
-	def perform
+	def perform(game, coordinates)
 	end
 
 	def self.identifier(args)
@@ -29,7 +29,7 @@ class VoteCommand
 end
 
 class VoteSweepCommand < VoteCommand
-  def perform(coordinates)
+  def perform(game, coordinates)
     return if not @game.board.valid_coordinates?(coordinates)
     @game.board.reveal_at(coordinates)
   end

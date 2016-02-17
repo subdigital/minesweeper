@@ -132,21 +132,27 @@ class Game < Hasu::Window
 
     # assign their new vote
     command_identifier = VoteCommand.identifier(args.slice(0..-2))
-    # existing_command = @voted_commands[existing_command]
-    # if existing_command
-    #   existing_command.add_vote username
-    # else
-    #   command_map = {
-    #     :sweep => VoteSweepCommand
-    #   }
+    @user_votes[username] = command_identifier
 
-    #   command_class = command_map[args[0]]
-    #   if command_class
-    #     vote = command_class.new(self, args.slice(1..-1))
-    #     @voted_commands.push(command_class.new(self, args.slice(1..-1))
-    #   end
+    puts "command identifier" + command_identifier
+    existing_command = @voted_commands[command_identifier]
+    if existing_command
+      existing_command.add_vote username
+    else
+      command_map = {
+        :sweep => VoteSweepCommand
+      }
 
-    # end
+      command_class = command_map[args[0]]
+      if command_class
+        vote = command_class.new(args.slice(1..-1))
+        @voted_commands[command_identifier] = vote
+      end
+
+      puts "added to @voted_commands"
+    end
+
+    puts "voted commands #{@voted_commands}"
 
   end
 
