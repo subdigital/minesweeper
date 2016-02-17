@@ -1,6 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    cinch (2.3.1)
+    dotenv (2.1.0)
     gosu (0.10.5)
     hasu (0.1.5)
       gosu
@@ -9,5 +11,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  cinch
+  dotenv
   gosu
   hasu
+
+BUNDLED WITH
+   1.11.2
