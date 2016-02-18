@@ -6,23 +6,17 @@ require 'thread'
 Hasu.load 'board.rb'
 Hasu.load 'led_display.rb'
 Hasu.load 'commands.rb'
+Hasu.load 'ballot.rb'
 
 class Game < Hasu::Window
   attr_reader :board
   attr_reader :mine_display
   attr_reader :command_queue
-  attr_reader :voted_commands
-  attr_reader :user_votes
 
   def initialize
     super 1000, 1000, fullscreen: false
     self.caption = "Minesweeper!"
-    setup_votes
-  end
-
-  def setup_votes
-    @voted_commands = {}
-    @user_votes = {}
+    @ballot = Ballot.new
   end
 
   def needs_cursor?
@@ -110,50 +104,18 @@ class Game < Hasu::Window
 
   def process_commands
     cmd = @command_queue.pop(true) rescue nil
+
     if cmd
       action = cmd.first
       args = cmd.slice(0..-1)
       puts "PROCESSING COMMAND: #{action}  (#{args})"
-      # Assuming commands are votes, create a Ballot.
-      Ballot.new(self).perform(*args)      
-    end
-  end
-
-  def vote(* args)
-    username = args[2]
-
-    puts "VOTING #{args}"
-    puts "Username: #{username}"
-
-    previous_vote = @user_votes[username]
-    if previous_vote
-      @voted_commands[previous_vote].remove_vote username
-    end
-
-    # assign their new vote
-    command_identifier = VoteCommand.identifier(args.slice(0..-2))
-    @user_votes[username] = command_identifier
-
-    puts "command identifier" + command_identifier
-    existing_command = @voted_commands[command_identifier]
-    if existing_command
-      existing_command.add_vote username
-    else
-      command_map = {
-        :sweep => VoteSweepCommand
-      }
-
-      command_class = command_map[args[0]]
-      if command_class
-        vote = command_class.new(args.slice(1..-1))
-        @voted_commands[command_identifier] = vote
+      if (args[0] == :execute) 
+        @ballot.elect(self)
+      else
+        @ballot.vote(* args)
       end
-
-      puts "added to @voted_commands"
+      
     end
-
-    puts "voted commands #{@voted_commands}"
-
   end
 
   def draw

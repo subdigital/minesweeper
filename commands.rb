@@ -1,7 +1,6 @@
 class VoteCommand
 	def initialize(args)
 		puts "initialized vote command with args #{args}"
-		# @game = game
 		@args = args
 		@voters = [args[1]]
 		puts "Vote command has voters #{@voters}"
@@ -34,20 +33,6 @@ class VoteSweepCommand < VoteCommand
     @game.board.reveal_at(coordinates)
   end
 end
-
-class Ballot
-	def initialize(game)
-		@game = game
-	end
-
-	def perform(*args)
-		puts "Ballot args #{args}"
-		puts args[1]
-		@game.vote(* args)
-	end
-end
-
-
 
 # class SweepCommand
 #   def initialize(game)

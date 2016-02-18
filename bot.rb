@@ -67,25 +67,26 @@ class MineSweeperBot < Cinch::Bot
           puts "bot.@game.board.field: #{bot.game.board.field}"
         end
 
+        if (m.message == 'execute')
+          bot.game.enqueue_command :execute
+        end
+
         if (m.message[0..4] == 'sweep')
           coordinates = bot.message_coordinates(m.message, 'sweep')
           next if coordinates.nil?
           bot.game.enqueue_command :sweep, coordinates, name
-#          bot.game.chat_select(coordinates)
         end
 
         if (m.message[0..3] == 'flag')
           coordinates = bot.message_coordinates(m.message, 'flag')
           next if coordinates.nil?
           bot.game.enqueue_command :flag, coordinates
-          #bot.game.chat_flag(coordinates)
         end
 
         if (m.message[0..5] == 'unflag')
           coordinates = bot.message_coordinates(m.message, 'unflag')
           next if coordinates.nil?
           bot.game.enqueue_command :unflag, coordinates
-          #bot.game.chat_unflag(coordinates)
         end
       end
 
