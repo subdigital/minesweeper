@@ -24,11 +24,6 @@ class ChatGame < Game
     @vote_timer_display.set_number @foo
   end
 
-	def update
-		super
-		@timers.wait
-	end
-
 	def new_game
 		super
 		@command_queue = Queue.new
@@ -69,4 +64,29 @@ class ChatGame < Game
       flag(coordinates)
     end
   end
+
+  def update
+    process_commands
+    if game_over?
+      @command_queue.clear
+    end
+    @timers.wait
+  end
+
+  def process_commands
+    cmd = @command_queue.pop(true) rescue nil
+
+    if cmd
+      action = cmd.first
+      args = cmd.slice(0..-1)
+      puts "PROCESSING COMMAND: #{action}  (#{args})"
+      if (args[0] == :execute) 
+        @ballot.elect(self)
+      else
+        @ballot.vote(* args)
+      end
+      
+    end
+  end
+
 end
