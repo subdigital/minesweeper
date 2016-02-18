@@ -11,7 +11,7 @@ class Ballot
     @user_votes = {}
   end
 
-	def vote(* args)
+	def vote(* args, game)
     username = args[2]
 
     puts "VOTING #{args}"
@@ -24,10 +24,10 @@ class Ballot
 
     # assign their new vote
     command_identifier = VoteCommand.identifier(args.slice(0..-2))
-    @user_votes[username] = command_identifier
 
     puts "command identifier" + command_identifier
     existing_command = @voted_commands[command_identifier]
+    
     if existing_command
       existing_command.add_vote username
     else
@@ -37,6 +37,14 @@ class Ballot
 
       command_class = command_map[args[0]]
       if command_class
+      	puts args[1]
+      	if not command_class.valid_coordinates?(game, args[1])
+      		puts "INVALID COORDINATES for #{args}"
+      		return
+      	end
+
+      	@user_votes[username] = command_identifier
+
         vote = command_class.new(args.slice(1..-1))
         @voted_commands[command_identifier] = vote
       end
@@ -49,6 +57,8 @@ class Ballot
   end
 
   def elect(game)
+  	return if @voted_commands.empty?
+
   	highest_commands = []
 		@voted_commands.each do |identifier, command|
 			if highest_commands.count == 0
@@ -64,9 +74,6 @@ class Ballot
 		highest_commands[index].perform(game)
 
 		reset_votes
-
-		puts "@voted_commands #{@voted_commands}"
-
   end
 
 end

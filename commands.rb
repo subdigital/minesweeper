@@ -26,12 +26,22 @@ class VoteCommand
 	def self.identifier(args)
 		args[0].to_s + args.slice(1..-1).to_s
 	end
+
+	def self.valid_coordinates?(game, coords)
+		game.board.valid_coordinates?(coords)
+	end
 end
 
 class VoteSweepCommand < VoteCommand
   def perform(game)
     return if not game.board.valid_coordinates?(@coordinates)
     game.board.reveal_at(@coordinates)
+  end
+
+  def self.valid_coordinates?(game, coords)
+  	puts "GAME #{game}"
+  	puts "COORDS #{coords.class}"
+  	super && game.board.tile_is?(coords, :raised)
   end
 end
 

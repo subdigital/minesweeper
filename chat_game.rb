@@ -88,7 +88,7 @@ class ChatGame < Game
       if (args[0] == :execute) 
         @ballot.elect(self)
       else
-        @ballot.vote(* args)
+        @ballot.vote(* args, self)
       end
       
     end
