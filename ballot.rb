@@ -3,9 +3,13 @@ class Ballot
   attr_reader :user_votes
 
 	def initialize
+		reset_votes
+	end
+
+	def reset_votes
 		@voted_commands = {}
     @user_votes = {}
-	end
+  end
 
 	def vote(* args)
     username = args[2]
@@ -56,7 +60,12 @@ class Ballot
 			end
 		end
 
-		puts "The highest commands are #{highest_commands.count} #{highest_commands}"
+		index = rand(0...highest_commands.length)
+		highest_commands[index].perform(game)
+
+		reset_votes
+
+		puts "@voted_commands #{@voted_commands}"
 
   end
 

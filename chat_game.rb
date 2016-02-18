@@ -14,14 +14,19 @@ class ChatGame < Game
 		super
 		@ballot = Ballot.new
     @timers = Timers::Group.new
-    @foo = 20
+    @countdown = 20
     @timers.every(1) { iterate_timer }
 	end
 
 	def iterate_timer
-    @foo = @foo - 1
-    @foo = 20 if @foo <= 0
-    @vote_timer_display.set_number @foo
+		@countdown = @countdown - 1
+		if @countdown == -10 
+			@ballot.elect(self)			
+			@countdown = 10
+		end
+
+    @vote_timer_display.set_number @countdown if @countdown > 0
+
   end
 
 	def new_game
