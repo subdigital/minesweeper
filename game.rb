@@ -132,7 +132,4 @@ class Game < Hasu::Window
 
 end
 
-if $0 == __FILE__
-  Game.run
-end
-
+Game.run if $0 == __FILE__
