@@ -64,14 +64,10 @@ class Board
     return field[y][x] == tile_index(:mine)
   end
 
-  def tile_is?(coords, symbol)
-    unless field
-      @field = generate_field(coords)
-    end
-
-    puts "the index is #{field[coords[:y]][coords[:x]]}"
-
-    field[coords[:y]][coords[:x]] == tile_index(symbol)
+  def playable_coordinates?(coords)
+    puts "visible #{visible_field}"
+    value = visible_field[coords[:y]][coords[:x]]
+    value == tile_index(:raised) || value == tile_index(:flag)
   end
 
   def number_of_adjacent_mines(x, y)
