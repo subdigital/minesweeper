@@ -33,7 +33,7 @@ class Board
 
   def initialize(window)
     @window = window
-    @num_tiles = 40
+    @num_tiles = 10
     _load_tiles
     @difficulty = MAX_DIFFICULTY
   end
