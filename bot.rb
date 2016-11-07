@@ -1,5 +1,8 @@
 require 'hasu'
 require 'cinch'
+require 'dotenv'
+
+Dotenv.load
 
 Hasu.load 'game.rb'
 
@@ -18,13 +21,26 @@ class MineSweeperBot < Cinch::Bot
     # irc.send text
   end
 
+  def message_coordinates(message, command)
+    message.gsub! /[\(\)\s]/, ''
+    coordinateCommand = message.split(command)[1]
+    return nil if coordinateCommand.nil?
+    coordinates = coordinateCommand.split(',')
+    return nil if coordinates.length != 2
+    x = Integer(coordinates[0]) rescue nil
+    return nil if x.nil?
+    y = Integer(coordinates[1]) rescue nil
+    return nil if y.nil?
+    return {x: x, y: y}
+  end
+
   def self.mineSweeperBot(game)
     MineSweeperBot.new(game) do
       configure do |c|
-        c.server = "irc.twitch.tv"
-        c.channels = ["#quantumproductions"]
-        c.nick = "quantumproductions"
-        c.password = "oauth:micj4w45jt0haehn3i8n68v2s07nsi" 
+        c.server = ENV['IRC_SERVER']
+        c.channels = [ENV['IRC_CHANNEL']]
+        c.nick = ENV['IRC_NICK']
+        c.password = ENV['IRC_PASSWORD']
       end
       
       on :message do |m, who, text| 
@@ -51,20 +67,26 @@ class MineSweeperBot < Cinch::Bot
           puts "bot.@game.board.field: #{bot.game.board.field}"
         end
 
+        if (m.message == 'execute')
+          bot.game.enqueue_command :execute
+        end
+
         if (m.message[0..4] == 'sweep')
-          coordinateCommand = m.message.split('sweep')[1]
-          puts "coordinateCommand#{coordinateCommand}"
-          return if coordinateCommand.nil?
-          coordinates = coordinateCommand.split(',')
-          puts "coordinates: #{coordinates}"
-          return if coordinates.length != 2
-          x = Integer(coordinates[0]) rescue nil
-          puts "x #{x}"
-          return if x.nil?
-          y = Integer(coordinates[1]) rescue nil
-          puts "y #{y}"
-          return if y.nil?
-          bot.game.chat_select({x: x, y: y})
+          coordinates = bot.message_coordinates(m.message, 'sweep')
+          next if coordinates.nil?
+          bot.game.enqueue_command :sweep, coordinates, name
+        end
+
+        if (m.message[0..3] == 'flag')
+          coordinates = bot.message_coordinates(m.message, 'flag')
+          next if coordinates.nil?
+          bot.game.enqueue_command :flag, coordinates
+        end
+
+        if (m.message[0..5] == 'unflag')
+          coordinates = bot.message_coordinates(m.message, 'unflag')
+          next if coordinates.nil?
+          bot.game.enqueue_command :unflag, coordinates
         end
       end
 

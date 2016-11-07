@@ -1,4 +1,4 @@
-require_relative 'game'
+require_relative 'chat_game'
 require_relative 'bot'
 
 class ChatSweeper
@@ -7,7 +7,7 @@ class ChatSweeper
 	attr_reader :bot
 
 	def run
-		@game = Game.new
+		@game = ChatGame.new
 		@bot = MineSweeperBot.mineSweeperBot(@game)
 		start_bot
 		@game.show
