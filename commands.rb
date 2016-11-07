@@ -1,4 +1,6 @@
 class VoteCommand
+  attr_reader :voters
+
 	def initialize(args)
 		puts "initialized vote command with args #{args}"
 		@coordinates = args[0]

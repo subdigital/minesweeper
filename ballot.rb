@@ -57,6 +57,8 @@ class Ballot
   end
 
   def elect(game)
+    game.new_game and return if game.game_over?
+    
   	return if @voted_commands.empty?
 
   	highest_commands = []
